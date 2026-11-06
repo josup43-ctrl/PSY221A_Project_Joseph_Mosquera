@@ -1,0 +1,122 @@
+---
+title: "lab04_Practice"
+author: "Joseph Mosquera"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Hypothesis
+
+H1: We predict religious affiliation (Religion_type) (categorical IV) will predict time spent living in country of birth (Country_live_time) (continuous DV).
+
+H2: We predict casual sexual experiences and preferences (composite continuous IV; mean of soi_behave, soi_attitude, and soi_desire) will predict relationship duration (Relationship_length) (continuous DV).
+
+```{r load package}
+library(ggplot2)
+library(ggrain)
+```
+
+```{r Load data}
+#load processed data
+h1Data <- read.csv("data/processed_data/practice_h1.csv")
+
+h2Data <- read.csv("data/processed_data/practice_h2.csv")
+
+
+#reorganize categorical variable
+table(h1Data$Religion_type)
+h1Data$Religion_type <- factor(h1Data$Religion_type, 
+                           levels = c("Christianity", "Islam", "Hinduism", "Buddhism", "Other", "Judaism", "None"))
+table(h1Data$Religion_type)
+```
+
+## H1 - Box Plot
+```{r H1Box}
+#Box plot
+#The line is the median; the box covers the middle 50% of responses (Q1-Q3).
+#Whiskers reach the most extreme observations within 1.5 IQR of the box edges.
+h1Box <- ggplot(data = h1Data,
+                aes(x = Religion_type, y = Country_live_time, fill = Religion_type)) +
+  geom_boxplot() + labs(x = "Religious affiliation", y = "Year(s) spent living in country of birth",
+                        title = "Time spent living in country of birth by religious affiliation", fill = "Religious affiliation") +
+  theme_minimal(base_size = 15)
+
+h1Box
+```
+
+## H1 - Violin Plot (with Box Plot)
+```{r H1Violin}
+#Violin Plot
+#Wider sections show where responses are more concentrated within each group.
+#The shape depends on smoothing; integer scores can create bumps.
+h1Viol <- ggplot(data = h1Data,
+                aes(x = Religion_type, y = Country_live_time, fill = Religion_type)) +
+                labs(x = "Religious affiliation", y = "Year(s) spent living in country of birth",
+                        title = "Time spent living in country of birth by religious affiliation", fill = "Religion type") +
+  theme_minimal(base_size = 15) +
+  geom_violin() +
+  geom_boxplot(width = .12)
+
+h1Viol
+```
+
+## H1 - Raincloud Plot
+```{r H1Raincloud}
+#Raincloud Plot
+#A raincloud combines a half-violin, a box plot, and individual responses.
+h1Rain <- ggplot(data = h1Data,
+                aes(x = Religion_type, y = Country_live_time, fill = Religion_type)) +
+  geom_boxplot() + labs(x = "Religious affiliation", y = "Year(s) spent living in country of birth",
+                        title = "religious affiliation and how many years spent living in country of birth ", fill = "Religion_type") +
+  geom_rain(alpha = .5) + 
+  theme_minimal(base_size = 8) 
+  
+h1Rain
+  #re-check what alpha is
+```
+
+
+
+```{r}
+#Scatter Plot
+h2point <- ggplot(data = h2Data, 
+                  aes(x = soiComposite, y = Relationship_length)) +
+  geom_point() +
+  labs(x = "Sociosexuality composite score", y = "Relationship duration", title = "Relationship between sociosexuality and relationship duration") +
+  theme_minimal(base_size = 8)
+
+h2point
+
+#Plot looks weird... why?
+#total points
+nrow(h2Data)
+#what we're seeing since the data is stacking
+nrow(unique(h2Data[, c("soiComposite", "Relationship_length")]))
+
+#Jitter
+h2jitter <- ggplot(data = h2Data, 
+                  aes(x = soiComposite, y = Relationship_length)) +
+  geom_jitter(width = 0.12, height = 0.04, alpha = 0.04, size = 0.6) +
+  labs(x = "Sociosexuality composite score", y = "Relationship duration", title = "Relationship between sociosexuality and relationship duration") +
+  theme_minimal(base_size = 8)
+
+h2jitter
+```
+
+```{r}
+#Scatter Plot with line
+h2Line <- h2jitter + geom_smooth(method = "lm")
+
+h2Line
+```
+
+```{r saveFigures}
+#Run after creating the plots. Save PNG files in the project's figures folder.
+dir.create("figures", showWarnings = FALSE)
+ggsave("figures/H1_figure_raincloud.png", plot = h1Rain, width = 10, height = 6, dpi = 300)
+ggsave("figures/H2_figures_line.png", plot = h2Line, width = 10, height = 6, dpi = 300)
+```

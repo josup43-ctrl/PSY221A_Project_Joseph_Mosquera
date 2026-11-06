@@ -1,0 +1,94 @@
+---
+title: "PSY221A: Descriptive Statistics"
+author: "Joseph Mosquera"
+output: html_document
+---
+
+## 1. Load the processed data
+
+```{r load}
+# Open the project's .Rproj file before running chunks.
+library(psych)
+
+h1Data <- read.csv("data/processed_data/practice_h1.csv")
+
+#if this doesnt work try putting it in the console & then it works
+h1Data <- read.csv("data/processed_data/practice_h1.csv")
+h2Data <- read.csv("data/processed_data/practice_h2.csv")
+```
+
+## 2. Look at the distribution first
+
+```{r histogram}
+# A histogram groups numerical values into intervals (bins).
+# Bar height shows how many observations fall in each interval.
+# Start by looking at the distribution before calculating summary statistics.
+hist(h1Data$Country_live_time)
+hist(h2Data$Relationship_length)
+#including composite score as well
+hist(h2Data$soiComposite)
+
+# Add readable labels to the same histogram.
+hist(h1Data$Country_live_time, main = "Distribution of time living in country of birth", xlab = "year(s) spent living in country of birth")
+
+hist(h2Data$Relationship_length, main = "Distribution of relationship duration", xlab = "Relationship duration")
+
+#adding readable labels for soi composite as well
+hist(h2Data$soiComposite, main = "Distribution of sociosexuality scores", xlab = "sociosexuality composite score (1-9)")
+```
+
+## 3. One statistic at a time
+
+```{r individual_statistics}
+# Mean: add the scores and divide by the number of observed responses.
+mean(h2Data$Relationship_length, na.rm = TRUE)
+# Median: the middle score after sorting the responses.
+median(h2Data$Relationship_length, na.rm = TRUE)
+# Table: count how many people are in each category.
+table(h1Data$Religion_type, useNA = "ifany")
+# Range: return the minimum and maximum, rather than their difference.
+range(h2Data$Relationship_length, na.rm = TRUE)
+# IQR: the 75th percentile minus the 25th percentile.
+IQR(h2Data$Relationship_length, na.rm = TRUE)
+
+```
+
+## 4. Standardize a variable
+
+```{r standardize}
+# scale() uses z = (original score - mean) / standard deviation by default.
+# Keep the original commitment scores and store the standardized values separately.
+# scale() returns a matrix; as.numeric() makes a simple numeric column.
+h2Data$soiComposite_z <- as.numeric(scale(h2Data$soiComposite))
+# Standardized scores have mean approximately 0 and standard deviation 1.
+#yes, close to 0 it's 8.844887e-17
+mean(h2Data$soiComposite_z, na.rm = TRUE)
+sd(h2Data$soiComposite_z, na.rm = TRUE)
+```
+
+## 5. Covariance and correlation
+
+```{r association}
+# Covariance describes whether two variables tend to move together.
+# Positive: higher values tend to occur together. Negative: higher values tend to accompany lower values.
+# Its size depends on the units and is not restricted to -1 through 1.
+cov(h2Data$soiComposite, h2Data$Relationship_length, use = "complete.obs")
+# Pearson correlation expresses a linear association on a -1 to 1 scale.
+cor(h2Data$soiComposite, h2Data$Relationship_length, use = "complete.obs")
+# Select numerical variables only; do not include participant IDs or category codes.
+corData <- h2Data[ ,c("soiComposite", "Relationship_length")]
+# A correlation matrix gives the correlation for each pair of columns.
+# The diagonal is 1 because each variable is correlated with itself.
+cor(corData, use = "complete.obs")
+```
+
+## 6. Several statistics at once
+
+```{r combined_summaries}
+# summary() reports minimum, quartiles, median, mean, maximum, and missing counts when present.
+summary(corData)
+# psych::describe() reports n, mean, SD, median, minimum, maximum, range width (max minus min), skewness, kurtosis, and other summaries.
+# However it does not report every statistic above: compute IQR, cov(), and cor() separately.
+psych::describe(corData)
+```
+
