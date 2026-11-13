@@ -41,6 +41,12 @@ hist(h2Data$soiComposite, main = "Distribution of sociosexuality scores", xlab =
 
 ```{r individual_statistics}
 # Mean: add the scores and divide by the number of observed responses.
+###JK: Add a numerical summary of Country_live_time for H1. ###
+# Both H2 variables are already covered by summary(corData) and describe(corData), so you do not need to repeat each statistic individually.
+# Add this for the H1 continuous variable:
+# psych::describe(h1Data["Country_live_time"])
+###  End of comment ###
+
 mean(h2Data$Relationship_length, na.rm = TRUE)
 # Median: the middle score after sorting the responses.
 median(h2Data$Relationship_length, na.rm = TRUE)
