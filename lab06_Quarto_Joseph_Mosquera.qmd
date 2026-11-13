@@ -1,0 +1,121 @@
+---
+title: "Religious Affiliation, Sociosexuality, and Relationship Duration"
+author: "Joseph Mosquera"
+format:
+  html:
+    toc: true
+    code-fold: true
+execute:
+  echo: true
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+#this is all for knitting & exporting knitted quarto/markdown #toc true
+adds table of contents #fold allows you to fold/unfold the generated
+subcode #echo true gives you the sub code that is generated
+
+```{r}
+#| label: load-data
+#| include: false
+library(ggplot2)
+library(ggrain)
+
+h1Data <- read.csv("data/processed_data/practice_h1.csv")
+h1Data$Religion_type <- factor(h1Data$Religion_type,
+                           levels = c("Christianity", "Islam", 
+                                      "Hinduism", "Buddhism", "Other", "Judaism", "None"))
+h2Data <- read.csv("data/processed_data/practice_h2.csv")
+```
+
+## H1: Religious affiliation & time spent living in country of birth
+
+We predict religious affiliation will predict time spent living in country of birth.
+
+### Variables & descriptive statistics
+
+- **Religious affiliation ('Religion_type'):** A categorical variable with seven groups: Christianity, Islam, Hinduism, Buddhism, Other, Judaism, & None.
+- **Time Spent living in country of birth ('Country_live_time'):** A continuous variable measuring the number of years respondents have lived in their country of birth. Valid responses range from 1-80.
+
+
+```{r}
+#| label: h1-descriptives
+# Count respondents in each group.
+table(h1Data$Religion_type)
+
+# Summarize attractiveness points separately for each group.
+by(h1Data$Country_live_time, h1Data$Religion_type, summary)
+                                                   #can do table or other functions, not just summary
+```
+
+### Graph
+
+@fig-religion shows the distribution of years spent living in country of birth by religious affiliation.
+The half-violin shows the shape of the distribution, the box summarizes
+the median and quartiles, and the dots represent individual responses.
+
+```{r}
+#| label: fig-religion
+#| fig-cap: "Time spent living in country of birth by religious affiliation."
+#| fig-width: 8
+#| fig-height: 5
+
+ggplot(h1Data, aes(x = Religion_type, y = Country_live_time, fill = Religion_type)) +
+  geom_rain(alpha = 0.5, point.args = list(alpha = 0.04, size = 0.6)) +
+  labs(x = "Religious affiliation", y = "Years spent living in country of birth") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+
+## H2. Sociosexuality & relationship duration
+
+We predict casual sexual experiences & preferences will predict relationship duration.
+
+### Variables and descriptive statistics
+
+- **Sociosexuality composite ('soiComposite'):** The mean of available responses to 'soi_behave', 'soi_attitude', & 'soi_desire'. Each item ranges from 1 to 9, with higher scores indicating more unrestricted sociosexuality. 
+- **Relationship duration ('relationship_length'):** A variable representing the length of respondendts' current relationships. Responses range from 1 to 80, with higer values indicating longer relationship duration.
+
+This dataset includes respondents who were dating, in a committed
+relationship, or married.
+
+
+```{r}
+#| label: h2-descriptives
+summary(h2Data[, c("soiComposite", "Relationship_length")])
+```
+
+### Graph
+
+@fig-relationship shows the relationship sociosexuality relationship 
+duration Points are jittered to make overlapping responses easier to
+see; the recorded scores are unchanged. The line summarizes the linear
+trend.
+
+```{r}
+#| label: fig-relationship
+#| fig-cap: "Sociosexuality composite scores and relationship duration."
+#| fig-width: 8
+#| fig-height: 5
+
+ggplot(h2Data, aes(x = soiComposite, y = Relationship_length)) +
+  geom_jitter(width = .12, height = .04, alpha = .04, size = .6) +
+  geom_smooth(method = "lm") +
+  labs(x = "Sociosexuality composite score (1–9)",
+       y = "Relationship duration (1–80)") +
+  theme_minimal()
+```
+
+### Observed trend
+
+```{r}
+#| label: correlation
+r <- cor(h2Data$soiComposite, h2Data$Relationship_length, use = "complete.obs")
+#r is value, 2 is the decimal spot to round to
+round(r, 2)
+```
+
+The correlation was `{r} round(r, 2)`, indicating a weak negative
+association. Respondents with higher sociosexuality composite scores tended to report shorter relationship duration 
